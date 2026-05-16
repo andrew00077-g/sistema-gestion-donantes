@@ -1,71 +1,54 @@
-import React from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import { Activity, Users, Droplets, Bell } from 'lucide-react';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import Inicio from './pages/Inicio';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import Donantes from './pages/Donantes';
+import Sidebar from './components/Sidebar';
 
-function App() {
-  // Estilos basados en tu paleta
-  const styles = {
-    navbar: { backgroundColor: '#C91C1C', color: 'white' },
-    cardHeader: { backgroundColor: '#F8FAF9', borderBottom: '1px solid #eee' },
-    sidebar: { backgroundColor: '#1F2937', minHeight: '100vh', color: 'white' }
-  };
+// Componente para manejar cuándo mostrar el menú lateral
+const Layout = ({ children }) => {
+  const location = useLocation();
+  
+  // Ocultamos el menú en Inicio y Login
+  const isPublicPage = location.pathname === '/' || location.pathname === '/login';
+
+  if (isPublicPage) {
+    return <div className="w-full min-h-screen bg-slate-50">{children}</div>;
+  }
 
   return (
-    <div className="d-flex">
-      {/* Sidebar - Capa de Navegación */}
-      <div className="p-3" style={styles.sidebar}>
-        <h4 className="text-center mb-4">Gestión Sangre</h4>
-        <ul className="nav flex-column">
-          <li className="nav-item mb-2"><a href="#" className="nav-link text-white"><Activity size={20}/> Dashboard</a></li>
-          <li className="nav-item mb-2"><a href="#" className="nav-link text-white"><Users size={20}/> Donantes</a></li>
-          <li className="nav-item mb-2"><a href="#" className="nav-link text-white"><Droplets size={20}/> Inventario</a></li>
-          <li className="nav-item mb-2"><a href="#" className="nav-link text-white"><Bell size={20}/> Alertas</a></li>
-        </ul>
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-grow-1 bg-light">
-        <nav className="navbar px-4 shadow-sm" style={styles.navbar}>
-          <span className="navbar-brand mb-0 h1 text-white">Panel de Administración</span>
+    <div className="flex min-h-screen w-screen overflow-x-hidden">
+      {/* Menú Lateral */}
+      <Sidebar />
+      
+      {/* Contenido Principal */}
+      <div className="flex-grow flex flex-col bg-slate-50">
+        <nav className="h-16 flex items-center px-6 bg-white border-b border-slate-200/60 text-slate-800 font-bold shadow-sm tracking-wide">
+          BANCO DE SANGRE DE REFERENCIA DEPARTAMENTAL
         </nav>
-
-        <div className="p-4">
-          <div className="row">
-            {/* Tarjeta de Donantes Activos */}
-            <div className="col-md-4">
-              <div className="card shadow-sm border-0 mb-4">
-                <div className="card-body text-center">
-                  <h6 className="text-muted">Donantes Activos</h6>
-                  <h2 style={{color: '#C91C1C'}}>1,240</h2>
-                </div>
-              </div>
-            </div>
-            {/* Tarjeta de Alertas Hoy */}
-            <div className="col-md-4">
-              <div className="card shadow-sm border-0 mb-4">
-                <div className="card-body text-center">
-                  <h6 className="text-muted">Alertas enviadas hoy</h6>
-                  <h2 className="text-primary">3</h2>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Área de Alerta Directa */}
-          <div className="card shadow-sm border-0">
-            <div className="card-header" style={styles.cardHeader}>
-              <h5 className="mb-0">Emitir Alerta de Emergencia</h5>
-            </div>
-            <div className="card-body">
-              <textarea className="form-control mb-3" rows="3" placeholder="Escriba el mensaje de emergencia..."></textarea>
-              <button className="btn text-white w-100" style={{backgroundColor: '#C91C1C'}}>
-                NOTIFICAR A DONANTES COMPATIBLES
-              </button>
-            </div>
-          </div>
+        <div className="flex-grow">
+          {children}
         </div>
       </div>
     </div>
+  );
+};
+
+function App() {
+  return (
+    <Router>
+      <Layout>
+        <Routes>
+          {/* Rutas Públicas */}
+          <Route path="/" element={<Inicio />} />
+          <Route path="/login" element={<Login />} />
+          
+          {/* Rutas Privadas (Administrativas) */}
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/donantes" element={<Donantes />} />
+        </Routes>
+      </Layout>
+    </Router>
   );
 }
 
