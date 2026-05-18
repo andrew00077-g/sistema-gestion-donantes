@@ -1,6 +1,10 @@
-import { Users, AlertTriangle, Droplets, BellRing, Sparkles, SendHorizontal, Activity } from 'lucide-react';
+import { useNavigate } from 'react-router-dom'; 
+import { Users, AlertTriangle, Droplets, BellRing, Sparkles, SendHorizontal, Activity, UserPlus } from 'lucide-react';
 
 const Dashboard = () => {
+
+  const navigate = useNavigate();
+
   // Datos simulados del inventario actual en Cochabamba
   const stockSangre = [
     { grupo: 'O RH+', porcentaje: 85, color: 'bg-red-600' },
@@ -23,20 +27,36 @@ const Dashboard = () => {
           <h3 className="text-3xl font-black text-slate-900 mt-1 tracking-tight">Panel General de Control</h3>
           <p className="text-sm text-slate-500 mt-0.5">Gestión operativa del Banco de Sangre de Referencia Departamental</p>
         </div>
-        <div className="flex items-center gap-3 bg-red-50 text-red-700 px-4 py-2.5 rounded-xl border border-red-100 text-sm font-medium">
-          <Activity size={18} className="animate-pulse" />
-          <span>Servidor Principal Activo</span>
+        
+        {/* PANEL DE ACCIONES DEL HEADER */}
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Nuevo botón interactivo para saltar a la Ficha de Registro */}
+          <button 
+            onClick={() => navigate('/registrar-donante')}
+            className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-md shadow-red-600/10 transition active:scale-95 outline-none"
+          >
+            <UserPlus size={18} />
+            <span>REGISTRAR DONANTE</span>
+          </button>
+
+          <div className="flex items-center gap-3 bg-slate-900 text-slate-100 px-4 py-2.5 rounded-xl text-sm font-medium shadow-sm">
+            <Activity size={18} className="text-red-500 animate-pulse" />
+            <span>Servidor Activo</span>
+          </div>
         </div>
       </header>
       
       {/* Tarjetas de Indicadores */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         
-        {/* Tarjeta: Donantes */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm flex items-center justify-between">
+        {/* Tarjeta: Donantes (Clickeable a /donantes) */}
+        <div 
+          onClick={() => navigate('/donantes')}
+          className="bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm flex items-center justify-between cursor-pointer hover:border-slate-400 hover:shadow-md transition-all duration-200 group"
+        >
           <div className="space-y-2">
             <p className="text-xs font-bold tracking-wider text-slate-400 uppercase">Donantes Activos</p>
-            <h4 className="text-4xl font-black text-slate-800 tracking-tight">1,248</h4>
+            <h4 className="text-4xl font-black text-slate-800 tracking-tight group-hover:text-red-600 transition-colors">1,248</h4>
             <span className="inline-block text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">
               +4.2% esta semana
             </span>
@@ -46,11 +66,14 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Tarjeta: Alertas */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm flex items-center justify-between">
+        {/* Tarjeta: Alertas (Clickeable a /alertas) */}
+        <div 
+          onClick={() => navigate('/alertas')}
+          className="bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm flex items-center justify-between cursor-pointer hover:border-amber-400 hover:shadow-md transition-all duration-200 group"
+        >
           <div className="space-y-2">
             <p className="text-xs font-bold tracking-wider text-slate-400 uppercase">Alertas Emitidas</p>
-            <h4 className="text-4xl font-black text-slate-800 tracking-tight">2</h4>
+            <h4 className="text-4xl font-black text-slate-800 tracking-tight group-hover:text-amber-500 transition-colors">2</h4>
             <span className="inline-block text-xs font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded">
               Atención inmediata
             </span>
@@ -120,14 +143,18 @@ const Dashboard = () => {
               <Sparkles size={14} />
               <span>Alcance estimado: ~450 donantes en Cochabamba</span>
             </div>
-            <button className="flex items-center gap-2 px-5 py-2.5 bg-red-600 text-white text-sm font-semibold rounded-xl hover:bg-red-700 transition shadow-md shadow-red-600/10 active:scale-95 group w-full sm:w-auto justify-center">
+            {/* El botón ahora redirige al módulo lógico de procesamiento de alertas */}
+            <button 
+              onClick={() => navigate('/alertas')}
+              className="flex items-center gap-2 px-5 py-2.5 bg-red-600 text-white text-sm font-semibold rounded-xl hover:bg-red-700 transition shadow-md shadow-red-600/10 active:scale-95 group w-full sm:w-auto justify-center outline-none"
+            >
               <span>EMITIR ALERTA</span>
               <SendHorizontal size={14} className="group-hover:translate-x-0.5 transition-transform" />
             </button>
           </div>
         </div>
 
-        {/* NUEVO PANEL: Monitor de Stock de Sangre Real (Reemplaza la tarjeta técnica) */}
+        {/* PANEL: Monitor de Stock de Sangre Real */}
         <div className="bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm space-y-4">
           <div>
             <h5 className="text-md font-bold text-slate-900">Niveles de Reserva (Stock)</h5>
