@@ -1,10 +1,23 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import Inicio from './pages/Inicio';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Donantes from './pages/Donantes';
-import FichaDonante from './pages/FichaDonante'; // <-- 1. Importamos la pantalla
+import FichaDonante from './pages/FichaDonante'; 
+import InventarioStock from './pages/InventarioStock';     
+import RegistrarUsuario from './pages/RegistrarUsuario'; 
 import Sidebar from './components/Sidebar';
+
+// GUARDiÁN DE SEGURIDAD INTERNO: Bloquea la ruta si no es administrador
+const RutaProtegidaAdmin = ({ children }) => {
+  const token = localStorage.getItem('token');
+  const rol = localStorage.getItem('rol');
+
+  if (!token || rol !== 'ADMIN') {
+    return <Navigate to="/dashboard" replace />; // Si intenta colarse un donante, lo mandamos al dashboard básico
+  }
+  return children;
+};
 
 const Layout = ({ children }) => {
   const location = useLocation();
@@ -29,7 +42,6 @@ const Layout = ({ children }) => {
   );
 };
 
-
 function App() {
   return (
     <Router>
@@ -39,11 +51,25 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/donantes" element={<Donantes />} />
-          <Route path="/registrar-donante" element={<FichaDonante />} /> {/* Ruta de Ficha */}
-    
+          <Route path="/registrar-donante" element={<FichaDonante />} />
+          <Route path="/inventario" element={<InventarioStock />} />
+          
+          {/* 2. NUEVA RUTA PROTEGIDA PARA REGISTRAR USUARIOS DEL SISTEMA */}
+          <Route 
+            path="/registrar" 
+            element={
+              <RutaProtegidaAdmin>
+                <RegistrarUsuario />
+              </RutaProtegidaAdmin>
+            } 
+          />
+
+          {/* Comodín por si escriben una URL rota, los regresa al login */}
+          <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </Layout>
     </Router>
   );
 }
+
 export default App;
