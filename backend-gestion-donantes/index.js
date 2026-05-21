@@ -1,11 +1,12 @@
-require('dotenv').config(); 
+require('dotenv').config(); // Línea 1 obligatoria para leer el .env
 
 const express = require('express');
 const cors = require('cors');
 
-
+// IMPORTACIÓN DE CONFIGURACIONES Y RUTAS
 const db = require('./src/config/db'); 
 const authRoutes = require('./src/routes/authRoutes'); 
+const donanteRoutes = require('./src/routes/donanteRoutes'); // <-- 1. Importamos las nuevas rutas de donantes
 
 const app = express();
 
@@ -21,8 +22,9 @@ app.get('/', (req, res) => {
     });
 });
 
-// CONEXIÓN DE LAS RUTAS
+// CONEXIÓN DE LAS RUTAS DEL SISTEMA
 app.use('/api/auth', authRoutes);
+app.use('/api/donantes', donanteRoutes); // <-- 2. Activamos el endpoint para el registro clínico de donantes
 
 const PORT = process.env.PORT || 3000;
 
