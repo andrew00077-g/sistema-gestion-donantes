@@ -20,7 +20,8 @@ const Sidebar = () => {
   // TRUCO DE SEGURIDAD EN VISTA: Si es ADMIN, le inyectamos la opción de Registrar Usuarios del Sistema
   if (userRol === 'ADMIN') {
     menuItems.push({ 
-      icon: <ShieldAlert size={20} className="text-red-400" />, 
+      
+      icon: <ShieldAlert size={20} />, 
       label: 'Registrar Usuario (Admin)', 
       path: '/registrar' // Apunta exactamente a la ruta que creamos en tu App.jsx
     });

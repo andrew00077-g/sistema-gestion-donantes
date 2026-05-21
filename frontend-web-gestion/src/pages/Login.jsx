@@ -1,4 +1,4 @@
-import { useState } from 'react'; // <-- Importamos useState
+import { useState } from 'react'; 
 import { useNavigate } from 'react-router-dom';
 import { HeartPulse } from 'lucide-react';
 
@@ -10,7 +10,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  // 2. FUNCIÓN DE CONEXIÓN REAL CON EL BACKEND
+  // 2. CONEXION REAL CON EL BACKEND
   const handleLogin = async (e) => {
     e.preventDefault();
     setError(''); // Limpiamos errores previos antes de intentar
@@ -31,6 +31,9 @@ const Login = () => {
         localStorage.setItem('token', datos.token);
         localStorage.setItem('rol', datos.usuario.rol);
         localStorage.setItem('email', datos.usuario.email);
+        
+        
+        localStorage.setItem('nombreAdmin', datos.usuario.nombre);
 
         // Saltamos al dashboard de verdad
         navigate('/dashboard');

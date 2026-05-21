@@ -1,9 +1,31 @@
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom'; 
-import { Users, AlertTriangle, Droplets, BellRing, Sparkles, SendHorizontal, Activity, UserPlus } from 'lucide-react';
+import { Users, AlertTriangle, Droplets, BellRing, Sparkles, SendHorizontal, UserPlus, LogOut } from 'lucide-react';
 
 const Dashboard = () => {
-
   const navigate = useNavigate();
+
+  // OPTIMIZACIÓN: Inicializamos el estado directamente leyendo el localStorage
+  const [nombreAdmin] = useState(() => {
+    return localStorage.getItem('nombreAdmin') || 'Administrador';
+  });
+
+  // CONTROL DE ACCESO (Solo valida y expulsa si no hay credenciales válidas)
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const rol = localStorage.getItem('rol');
+
+    if (!token || rol !== 'ADMIN') {
+      localStorage.clear(); // Limpiamos rastro corrupto
+      navigate('/login');
+    }
+  }, [navigate]);
+
+  // Función para cerrar sesión de forma segura
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate('/login');
+  };
 
   // Datos simulados del inventario actual en Cochabamba
   const stockSangre = [
@@ -22,34 +44,38 @@ const Dashboard = () => {
         <div>
           <div className="flex items-center gap-2">
             <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <p className="text-xs font-bold uppercase tracking-wider text-emerald-600">Sistema en Vivo</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-emerald-600">Bienvenido al Sistema</p>
           </div>
-          <h3 className="text-3xl font-black text-slate-900 mt-1 tracking-tight">Panel General de Control</h3>
+          <h3 className="text-3xl font-black text-slate-900 mt-1 tracking-tight">
+            Hola, <span className="text-red-600">Dr. {nombreAdmin}</span>
+          </h3>
           <p className="text-sm text-slate-500 mt-0.5">Gestión operativa del Banco de Sangre de Referencia Departamental</p>
         </div>
         
         {/* PANEL DE ACCIONES DEL HEADER */}
         <div className="flex flex-wrap items-center gap-3">
-          {/* Nuevo botón interactivo para saltar a la Ficha de Registro */}
           <button 
             onClick={() => navigate('/registrar-donante')}
-            className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-md shadow-red-600/10 transition active:scale-95 outline-none"
+            className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-md shadow-red-600/10 transition active:scale-95"
           >
             <UserPlus size={18} />
             <span>REGISTRAR DONANTE</span>
           </button>
 
-          <div className="flex items-center gap-3 bg-slate-900 text-slate-100 px-4 py-2.5 rounded-xl text-sm font-medium shadow-sm">
-            <Activity size={18} className="text-red-500 animate-pulse" />
-            <span>Servidor Activo</span>
-          </div>
+          {/* Botón de Cerrar Sesión */}
+          <button 
+            onClick={handleLogout}
+            className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl text-sm font-bold transition active:scale-95"
+          >
+            <LogOut size={18} />
+          </button>
         </div>
       </header>
       
       {/* Tarjetas de Indicadores */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         
-        {/* Tarjeta: Donantes (Clickeable a /donantes) */}
+        {/* Tarjeta: Donantes */}
         <div 
           onClick={() => navigate('/donantes')}
           className="bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm flex items-center justify-between cursor-pointer hover:border-slate-400 hover:shadow-md transition-all duration-200 group"
@@ -66,7 +92,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Tarjeta: Alertas (Clickeable a /alertas) */}
+        {/* Tarjeta: Alertas */}
         <div 
           onClick={() => navigate('/alertas')}
           className="bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm flex items-center justify-between cursor-pointer hover:border-amber-400 hover:shadow-md transition-all duration-200 group"
@@ -143,10 +169,9 @@ const Dashboard = () => {
               <Sparkles size={14} />
               <span>Alcance estimado: ~450 donantes en Cochabamba</span>
             </div>
-            {/* El botón ahora redirige al módulo lógico de procesamiento de alertas */}
             <button 
               onClick={() => navigate('/alertas')}
-              className="flex items-center gap-2 px-5 py-2.5 bg-red-600 text-white text-sm font-semibold rounded-xl hover:bg-red-700 transition shadow-md shadow-red-600/10 active:scale-95 group w-full sm:w-auto justify-center outline-none"
+              className="flex items-center gap-2 px-5 py-2.5 bg-red-600 text-white text-sm font-semibold rounded-xl hover:bg-red-700 transition shadow-md shadow-red-600/10 active:scale-95 group w-full sm:w-auto justify-center"
             >
               <span>EMITIR ALERTA</span>
               <SendHorizontal size={14} className="group-hover:translate-x-0.5 transition-transform" />
