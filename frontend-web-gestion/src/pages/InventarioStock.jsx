@@ -1,140 +1,128 @@
-import { useState } from 'react';
-import { Droplet, AlertTriangle, ShieldCheck, RefreshCw, Search, Layers } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Droplets, RefreshCw, AlertTriangle, CheckCircle } from 'lucide-react';
 
 const InventarioStock = () => {
-  const [filtroGrupo, setFiltroGrupo] = useState('Todos');
+  const [inventario, setInventario] = useState([]);
+  const [cargando, setCargando] = useState(true);
+  const token = localStorage.getItem('token');
 
-  // Datos simulados del inventario de Cochabamba para el Frontend (70% de avance)
-  const stockData = [
-    { id: 1, grupo: 'O RH+', tipo: 'Glóbulos Rojos', unidades: 45, estado: 'Óptimo', vencimiento: 'Próx. 15 días' },
-    { id: 2, grupo: 'O RH-', tipo: 'Glóbulos Rojos', unidades: 3, estado: 'Crítico', vencimiento: 'Próx. 8 días' },
-    { id: 3, grupo: 'A RH+', tipo: 'Plasma Fresco', unidades: 28, estado: 'Óptimo', vencimiento: 'Próx. 30 días' },
-    { id: 4, grupo: 'A RH-', tipo: 'Plaquetas', unidades: 5, estado: 'Crítico', vencimiento: 'Próx. 3 días' },
-    { id: 5, grupo: 'B RH+', tipo: 'Glóbulos Rojos', unidades: 19, estado: 'Bajo', vencimiento: 'Próx. 12 días' },
-    { id: 6, grupo: 'AB RH+', tipo: 'Plasma Fresco', unidades: 12, estado: 'Óptimo', vencimiento: 'Próx. 25 días' },
-  ];
+  // 🔄 Función exclusiva para el botón manual (evita colisiones con el efecto inicial)
+  const refrescarInventarioManual = async () => {
+    setCargando(true);
+    try {
+      const res = await fetch('http://localhost:3000/api/operaciones/inventario', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const datos = await res.json();
+        setInventario(datos);
+      }
+    } catch (error) {
+      console.error("Error cargando inventario:", error);
+    } finally {
+      setCargando(false);
+    }
+  };
 
-  const gruposSanguineos = ['Todos', 'O RH+', 'O RH-', 'A RH+', 'A RH-', 'B RH+', 'AB RH+'];
+  // 🌟 SOLUCIÓN AL ADVERTENCIA: Aislamos el fetch síncrono inicial dentro de su propio efecto
+  useEffect(() => {
+    let activo = true; // Bandera para evitar fugas de memoria si el componente se desmonta rápido
 
-  // Filtrar datos según la selección del usuario
-  const stockFiltrado = filtroGrupo === 'Todos' 
-    ? stockData 
-    : stockData.filter(item => item.grupo === filtroGrupo);
+    const cargarDatosIniciales = async () => {
+      setCargando(true);
+      try {
+        const res = await fetch('http://localhost:3000/api/operaciones/inventario', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok && activo) {
+          const datos = await res.json();
+          setInventario(datos);
+        }
+      } catch (error) {
+        console.error("Error cargando inventario inicial:", error);
+      } finally {
+        if (activo) setCargando(false);
+      }
+    };
+
+    cargarDatosIniciales();
+
+    return () => {
+      activo = false; // Limpieza del efecto
+    };
+  }, [token]); // Agregamos token como dependencia segura
+
+  // Función auxiliar para simular un stock completo con los 8 grupos si la BD está vacía
+  const gruposBase = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+  const obtenerUnidades = (group) => {
+    const registro = inventario.find(item => item.tipo_sangre === group);
+    return registro ? registro.cantidad_unidades : 0;
+  };
 
   return (
-    <div className="p-8 space-y-8 bg-slate-50 min-h-screen">
-      
-      {/* Encabezado */}
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm">
-        <div>
-          <h3 className="text-3xl font-black text-slate-900 tracking-tight">Inventario de Hemocomponentes</h3>
-          <p className="text-sm text-slate-500 mt-0.5">Control de reservas de bolsas de sangre, plasma y plaquetas.</p>
+    <div className="p-8 max-w-6xl mx-auto space-y-8 font-sans pb-16">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-slate-200 pb-4">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 bg-red-50 text-red-600 rounded-xl">
+            <Droplets size={24} />
+          </div>
+          <div>
+            <h1 className="text-2xl font-black text-slate-800 tracking-tight">Inventario de Sangre</h1>
+            <p className="text-sm text-slate-500">Stock físico de unidades disponibles en el Banco de Referencia</p>
+          </div>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold rounded-xl transition active:scale-95">
-          <RefreshCw size={16} />
-          <span>Sincronizar Stock</span>
+        
+        <button 
+          onClick={refrescarInventarioManual} 
+          className="flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold bg-slate-900 text-white rounded-xl hover:bg-slate-800 transition shadow-sm self-start sm:self-center"
+        >
+          <RefreshCw size={14} className={cargando ? 'animate-spin' : ''} />
+          ACTUALIZAR STOCK
         </button>
-      </header>
-
-      {/* Tarjetas de Resumen Rápido */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm flex items-center justify-between">
-          <div className="space-y-1">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Bolsas Almacenadas</p>
-            <h4 className="text-4xl font-black text-slate-800 tracking-tight">112 Unidades</h4>
-          </div>
-          <div className="p-4 bg-red-50 text-red-600 rounded-xl">
-            <Layers size={24} />
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm flex items-center justify-between">
-          <div className="space-y-1">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Alertas por Desabastecimiento</p>
-            <h4 className="text-4xl font-black text-rose-600 tracking-tight">2 Grupos</h4>
-          </div>
-          <div className="p-4 bg-rose-50 text-rose-600 rounded-xl animate-pulse">
-            <AlertTriangle size={24} />
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm flex items-center justify-between">
-          <div className="space-y-1">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Productos Verificados</p>
-            <h4 className="text-4xl font-black text-emerald-600 tracking-tight">100% Aptos</h4>
-          </div>
-          <div className="p-4 bg-emerald-50 text-emerald-600 rounded-xl">
-            <ShieldCheck size={24} />
-          </div>
-        </div>
       </div>
 
-      {/* Filtros de Búsqueda */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200/60 shadow-sm flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-2 text-slate-400 pl-2">
-          <Search size={18} />
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Filtrar Grupo:</span>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {gruposSanguineos.map((grupo) => (
-            <button
-              key={grupo}
-              onClick={() => setFiltroGrupo(grupo)}
-              className={`px-4 py-2 text-xs font-bold rounded-xl transition-all ${
-                filtroGrupo === grupo 
-                  ? 'bg-slate-900 text-white shadow-sm' 
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-              }`}
-            >
-              {grupo}
-            </button>
-          ))}
-        </div>
-      </div>
+      {cargando ? (
+        <div className="text-center p-20 font-bold text-slate-500 text-sm">Consultando cámaras frigoríficas...</div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {gruposBase.map((grupo) => {
+            const unidades = obtenerUnidades(grupo);
+            const esBajoStock = unidades <= 2;
 
-      {/* Tabla del Inventario */}
-      <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-slate-50 border-b border-slate-200 text-slate-400 text-[11px] font-bold uppercase tracking-wider">
-                <th className="py-4 px-6">Grupo Sanguíneo</th>
-                <th className="py-4 px-6">Tipo de Componente</th>
-                <th className="py-4 px-6 text-center">Unidades Disponibles</th>
-                <th className="py-4 px-6">Estado de Alerta</th>
-                <th className="py-4 px-6">Próximo Vencimiento</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 text-slate-700 text-sm font-medium">
-              {stockFiltrado.map((item) => (
-                <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
-                  <td className="py-4 px-6">
-                    <div className="flex items-center gap-2.5">
-                      <div className="p-1.5 bg-red-50 text-red-600 rounded-lg">
-                        <Droplet size={16} fill="currentColor" />
-                      </div>
-                      <span className="font-black text-slate-900 text-base">{item.grupo}</span>
-                    </div>
-                  </td>
-                  <td className="py-4 px-6 text-slate-500">{item.tipo}</td>
-                  <td className="py-4 px-6 text-center font-bold text-slate-800 text-base">{item.unidades}</td>
-                  <td className="py-4 px-6">
-                    <span className={`inline-block px-2.5 py-1 rounded-lg text-xs font-bold ${
-                      item.estado === 'Crítico' ? 'bg-rose-50 text-rose-600 border border-rose-100 animate-pulse' :
-                      item.estado === 'Bajo' ? 'bg-amber-50 text-amber-600 border border-amber-100' :
-                      'bg-emerald-50 text-emerald-600 border border-emerald-100'
-                    }`}>
-                      {item.estado}
-                    </span>
-                  </td>
-                  <td className="py-4 px-6 text-slate-400 text-xs font-semibold">{item.vencimiento}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+            return (
+              <div key={grupo} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between hover:border-slate-300 transition relative overflow-hidden">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <span className="text-3xl font-black text-slate-900 tracking-tighter">{grupo}</span>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Factor Sanguíneo</p>
+                  </div>
+                  <div className={`p-2 rounded-xl ${esBajoStock ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600'}`}>
+                    {esBajoStock ? <AlertTriangle size={18} /> : <CheckCircle size={18} />}
+                  </div>
+                </div>
 
+                <div className="mt-8 space-y-2">
+                  <div className="flex justify-between items-baseline">
+                    <span className="text-4xl font-black text-slate-800">{unidades}</span>
+                    <span className="text-xs text-slate-500 font-bold">unidades</span>
+                  </div>
+
+                  <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div 
+                      className={`h-full rounded-full transition-all duration-500 ${esBajoStock ? 'bg-amber-500' : 'bg-emerald-500'}`}
+                      style={{ width: `${Math.min((unidades / 10) * 100, 100)}%` }}
+                    ></div>
+                  </div>
+
+                  <p className={`text-[10px] font-black uppercase tracking-wide pt-1 ${esBajoStock ? 'text-amber-600' : 'text-emerald-600'}`}>
+                    {esBajoStock ? '⚠️ Stock Crítico / Solicitar Alerta' : '✓ Stock Seguro'}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };
