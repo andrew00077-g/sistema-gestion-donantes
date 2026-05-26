@@ -6,6 +6,7 @@ import Donantes from './pages/Donantes';
 import FichaDonante from './pages/FichaDonante'; 
 import InventarioStock from './pages/InventarioStock';     
 import RegistrarUsuario from './pages/RegistrarUsuario'; 
+import Alertas from './pages/Alertas'; 
 import Sidebar from './components/Sidebar';
 
 // GUARDiÁN DE SEGURIDAD INTERNO: Bloquea la ruta si no es administrador
@@ -53,6 +54,9 @@ function App() {
           <Route path="/donantes" element={<Donantes />} />
           <Route path="/registrar-donante" element={<FichaDonante />} />
           <Route path="/inventario" element={<InventarioStock />} />
+          
+      
+          <Route path="/alertas" element={<Alertas />} />
           
           {/* 2. NUEVA RUTA PROTEGIDA PARA REGISTRAR USUARIOS DEL SISTEMA */}
           <Route 

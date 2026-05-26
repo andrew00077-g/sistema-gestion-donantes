@@ -3,17 +3,20 @@ require('dotenv').config(); // Línea 1 obligatoria para leer el .env
 const express = require('express');
 const cors = require('cors');
 
-// IMPORTACIÓN DE CONFIGURACIONES Y RUTAS
+// 1. IMPORTACIÓN DE CONFIGURACIONES Y RUTAS
 const db = require('./src/config/db'); 
 const authRoutes = require('./src/routes/authRoutes'); 
-const donanteRoutes = require('./src/routes/donanteRoutes'); // <-- 1. Importamos las nuevas rutas de donantes
+const donanteRoutes = require('./src/routes/donanteRoutes'); 
+const operacionesRoutes = require('./src/routes/operacionesRoutes'); // Importación de alertas y citas
 
+// 2. INICIALIZACIÓN DE EXPRESS
 const app = express();
 
+// 3. MIDDLEWARES GLOBALES
 app.use(cors()); 
 app.use(express.json()); 
 
-// RUTA DE PRUEBA GENERAL
+// 4. RUTA DE PRUEBA GENERAL
 app.get('/', (req, res) => {
     res.json({ 
         mensaje: 'API de Gestion de Donantes funcionando',
@@ -22,10 +25,12 @@ app.get('/', (req, res) => {
     });
 });
 
-// CONEXIÓN DE LAS RUTAS DEL SISTEMA
+// 5. CONEXIÓN DE LAS RUTAS DEL SISTEMA (Todas agrupadas y ordenadas)
 app.use('/api/auth', authRoutes);
-app.use('/api/donantes', donanteRoutes); // <-- 2. Activamos el endpoint para el registro clínico de donantes
+app.use('/api/donantes', donanteRoutes); 
+app.use('/api/operaciones', operacionesRoutes); 
 
+// 6. ENCENDIDO DEL SERVIDOR
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
