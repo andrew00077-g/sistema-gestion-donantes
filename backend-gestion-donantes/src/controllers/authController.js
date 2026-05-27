@@ -1,6 +1,15 @@
-const db = require('../config/db'); // Conexión a tu MySQL Pool
+const db = require('../config/db'); 
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer'); 
+// Configuración del transporte de correo electrónico 
+const transporador = nodemailer.createTransport({
+    service: 'gmail', 
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+    }
+});
 
 
 exports.crearPrimerAdmin = async (req, res) => {
@@ -47,9 +56,7 @@ exports.crearPrimerAdmin = async (req, res) => {
     }
 };
 
-// =========================================================================
-// 2. LOGIN DE USUARIOS (Con búsqueda dinámica de nombre integrada)
-// =========================================================================
+
 exports.loginUsuario = async (req, res) => {
     const { email, password } = req.body;
 
@@ -113,6 +120,7 @@ exports.loginUsuario = async (req, res) => {
     }
 };
 
+
 exports.registrarUsuario = async (req, res) => {
     const { email, password, rol, nombres, apellidos, cargo, codigo_medico } = req.body;
 
@@ -162,5 +170,67 @@ exports.registrarUsuario = async (req, res) => {
         res.status(500).json({ msg: 'Error al registrar al usuario.' });
     } finally {
         connection.release();
+    }
+};
+
+exports.recuperarContrasena = async (req, res) => {
+    const { email } = req.body;
+
+    if (!email) {
+        return res.status(400).json({ msg: 'El correo electrónico es requerido.' });
+    }
+
+    try {
+        // 1. Verificar si el usuario existe en el sistema
+        const [usuarios] = await db.query('SELECT * FROM usuarios WHERE email = ?', [email]);
+        if (usuarios.length === 0) {
+            return res.status(404).json({ msg: 'No existe ningún usuario registrado con este correo.' });
+        }
+
+        const usuario = usuarios[0];
+
+        // 2. Generar una contraseña temporal aleatoria de 8 caracteres
+        const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#';
+        let contrasenaTemporal = '';
+        for (let i = 0; i < 8; i++) {
+            contrasenaTemporal += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
+        }
+
+        // 3. Encriptar la contraseña temporal usando bcrypt
+        const salt = await bcrypt.genSalt(10);
+        const nuevaClaveEncriptada = await bcrypt.hash(contrasenaTemporal, salt);
+
+        // 4. Actualizar la clave usando la columna real 'password_hash' e 'id_usuario'
+        await db.query(
+            'UPDATE usuarios SET password_hash = ? WHERE id_usuario = ?', 
+            [nuevaClaveEncriptada, usuario.id_usuario]
+        );
+
+        // 5. Configurar el cuerpo del correo con diseño profesional
+        const opcionesCorreo = {
+            from: `"Banco de Sangre" <${process.env.EMAIL_USER}>`,
+            to: email,
+            subject: ' Restablecimiento de Credenciales - Banco de Sangre',
+            html: `
+                <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px;">
+                    <h2 style="color: #dc2626; text-align: center; font-weight: 900;">Banco de Sangre Referencia</h2>
+                    <p style="color: #475569; font-size: 14px;">Hola, se ha solicitado un restablecimiento de contraseña para tu perfil en el sistema.</p>
+                    <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; text-align: center; margin: 20px 0; border: 1px dashed #cbd5e1;">
+                        <span style="font-size: 12px; font-weight: bold; color: #64748b; display: block; margin-bottom: 5px;">TU CONTRASEÑA TEMPORAL</span>
+                        <code style="font-size: 20px; font-weight: bold; color: #0f172a; letter-spacing: 2px;">${contrasenaTemporal}</code>
+                    </div>
+                    <p style="color: #e11d48; font-size: 11px; font-weight: bold; text-align: center;">Por seguridad, inicia sesión con esta clave y cámbiala lo antes posible en los ajustes de tu cuenta.</p>
+                </div>
+            `
+        };
+
+        // 6. Enviar el correo electrónico de forma asíncrona
+        await transporador.sendMail(opcionesCorreo);
+
+        res.json({ msg: 'Se ha enviado una contraseña temporal a tu correo electrónico con éxito.' });
+
+    } catch (error) {
+        console.error("Error en recuperación de clave:", error);
+        res.status(500).json({ msg: 'Error de servidor al procesar la solicitud de recuperación.' });
     }
 };

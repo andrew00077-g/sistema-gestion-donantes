@@ -12,4 +12,7 @@ router.post('/login', authController.loginUsuario);
 // Ruta protegida: Solo si estás logueado Y eres ADMIN puedes registrar nuevos usuarios
 router.post('/registrar', verificarToken, esAdmin, authController.registrarUsuario);
 
+router.post('/recuperar', authController.recuperarContrasena);
+
+
 module.exports = router;
