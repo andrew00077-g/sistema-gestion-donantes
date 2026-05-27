@@ -14,5 +14,7 @@ router.post('/registrar', verificarToken, esAdmin, authController.registrarUsuar
 
 router.post('/recuperar', authController.recuperarContrasena);
 
+router.put('/actualizar-perfil', verificarToken, authController.actualizarPerfil);
+
 
 module.exports = router;

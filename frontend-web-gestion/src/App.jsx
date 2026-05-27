@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate, useNavigate } from 'react-router-dom';
 import Inicio from './pages/Inicio';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
@@ -8,6 +8,7 @@ import InventarioStock from './pages/InventarioStock';
 import RegistrarUsuario from './pages/RegistrarUsuario'; 
 import Alertas from './pages/Alertas'; 
 import Sidebar from './components/Sidebar';
+import MenuPerfil from './components/MenuPerfil';
 
 // GUARDiÁN DE SEGURIDAD INTERNO: Bloquea la ruta si no es administrador
 const RutaProtegidaAdmin = ({ children }) => {
@@ -15,14 +16,36 @@ const RutaProtegidaAdmin = ({ children }) => {
   const rol = localStorage.getItem('rol');
 
   if (!token || rol !== 'ADMIN') {
-    return <Navigate to="/dashboard" replace />; // Si intenta colarse un donante, lo mandamos al dashboard básico
+    return <Navigate to="/dashboard" replace />; 
   }
   return children;
 };
 
+// COMPONENTE LAYOUT UNIFICADO
 const Layout = ({ children }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const isPublicPage = location.pathname === '/' || location.pathname === '/login';
+
+  // Calculamos el usuario dinámicamente durante el renderizado 
+  // en vez de usar un estado local y sincronizarlo con useEffect.
+  let usuarioActual = null;
+  
+  if (localStorage.getItem('token')) {
+    usuarioActual = {
+      nombre: localStorage.getItem('nombre') || 'Dr. Andrew',
+      rol: localStorage.getItem('rol') || 'ADMIN',
+      email: localStorage.getItem('email') || 'admin@banco.com',
+      ci: localStorage.getItem('ci') || '0000000',
+      telefono: localStorage.getItem('telefono') || '70000000'
+    };
+  }
+
+  // Función para borrar sesión y mandar al usuario al Login
+  const alCerrarSesion = () => {
+    localStorage.clear(); // Limpia token, roles y datos
+    navigate('/login');
+  };
 
   if (isPublicPage) {
     return <div className="w-full min-h-screen bg-slate-50">{children}</div>;
@@ -32,9 +55,18 @@ const Layout = ({ children }) => {
     <div className="flex min-h-screen w-screen overflow-x-hidden">
       <Sidebar />
       <div className="flex-grow flex flex-col bg-slate-50">
-        <nav className="h-16 flex items-center px-6 bg-white border-b border-slate-200/60 text-slate-800 font-bold shadow-sm tracking-wide">
-          BANCO DE SANGRE DE REFERENCIA DEPARTAMENTAL
+        
+        {/* Barra superior inteligente flex */}
+        <nav className="h-16 flex items-center justify-between px-6 bg-white border-b border-slate-200/60 text-slate-800 font-bold shadow-sm tracking-wide">
+          <span>BANCO DE SANGRE DE REFERENCIA DEPARTAMENTAL</span>
+          
+          {/* Añadimos el menú interactivo a la derecha */}
+          <MenuPerfil 
+            usuarioActual={usuarioActual} 
+            alCerrarSesion={alCerrarSesion} 
+          />
         </nav>
+
         <div className="flex-grow">
           {children}
         </div>
@@ -54,11 +86,8 @@ function App() {
           <Route path="/donantes" element={<Donantes />} />
           <Route path="/registrar-donante" element={<FichaDonante />} />
           <Route path="/inventario" element={<InventarioStock />} />
-          
-      
           <Route path="/alertas" element={<Alertas />} />
           
-          {/* 2. NUEVA RUTA PROTEGIDA PARA REGISTRAR USUARIOS DEL SISTEMA */}
           <Route 
             path="/registrar" 
             element={
@@ -68,7 +97,6 @@ function App() {
             } 
           />
 
-          {/* Comodín por si escriben una URL rota, los regresa al login */}
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </Layout>

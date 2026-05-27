@@ -1,16 +1,19 @@
 import { useState } from 'react';
-import { UserPlus, ShieldCheck, Mail, Lock, UserCog, User, Briefcase, FileCode } from 'lucide-react';
+import { UserPlus, ShieldCheck, Mail, Lock, UserCog, User, Briefcase, FileCode, Eye, EyeOff, IdCard, Phone } from 'lucide-react';
 
 const RegistrarUsuario = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [rol, setRol] = useState('MEDICO'); // Por defecto 'MEDICO'
-  
+  const [mostrarPassword, setMostrarPassword] = useState(false);
+  const [rol, setRol] = useState('MEDICO'); 
 
+  // Nuevos estados alineados a la base de datos actualizada
+  const [ci, setCi] = useState('');
   const [nombres, setNombres] = useState('');
   const [apellidos, setApellidos] = useState('');
   const [cargo, setCargo] = useState('');
   const [codigoMedico, setCodigoMedico] = useState('');
+  const [telefono, setTelefono] = useState('');
 
   const [mensaje, setMensaje] = useState({ texto: '', tipo: '' });
   const [cargando, setCargando] = useState(false);
@@ -28,16 +31,17 @@ const RegistrarUsuario = () => {
       return;
     }
 
-    // Preparamos el objeto con la data estructurada
+    // Enviamos el paquete completo de datos solicitado por la nueva estructura
     const dataFormulario = { 
       email, 
       password, 
       rol,
-      // Solo mandamos estos datos si es un ADMIN para evitar ruido en la API
-      nombres: rol === 'ADMIN' ? nombres : null,
-      apellidos: rol === 'ADMIN' ? apellidos : null,
-      cargo: rol === 'ADMIN' ? cargo : null,
-      codigo_medico: rol === 'ADMIN' ? codigoMedico : null
+      ci,
+      nombres,
+      apellidos,
+      cargo,
+      codigo_medico: codigoMedico,
+      telefono
     };
 
     try {
@@ -53,20 +57,22 @@ const RegistrarUsuario = () => {
       const datos = await respuesta.json();
 
       if (respuesta.ok) {
-        setMensaje({ texto: datos.msg || 'Usuario creado exitosamente', tipo: 'exito' });
-        // Limpiamos todos los campos tras el éxito
+        setMensaje({ texto: datos.msg || 'Personal registrado exitosamente', tipo: 'exito' });
+        // Limpieza absoluta de campos tras el éxito
         setEmail('');
         setPassword('');
         setRol('MEDICO');
+        setCi('');
         setNombres('');
         setApellidos('');
         setCargo('');
         setCodigoMedico('');
+        setTelefono('');
       } else {
         setMensaje({ texto: datos.msg || 'Error al registrar', tipo: 'error' });
       }
-    // eslint-disable-next-line no-unused-vars
     } catch (error) {
+      console.error("Error en conexión de registro:", error);
       setMensaje({ texto: 'Error de conexión con el servidor.', tipo: 'error' });
     } finally {
       setCargando(false);
@@ -95,7 +101,7 @@ const RegistrarUsuario = () => {
 
         <form onSubmit={handleRegistro} className="p-6 space-y-6">
           
-          {/* Alertas de Estado dinámicas */}
+          {/* Alertas de Estado */}
           {mensaje.texto && (
             <div className={`p-4 rounded-xl text-xs font-bold border transition-all ${
               mensaje.tipo === 'exito' 
@@ -106,7 +112,7 @@ const RegistrarUsuario = () => {
             </div>
           )}
 
-          {/* Selector de Roles Exclusivos de Sistema */}
+          {/* Selector de Roles */}
           <div>
             <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Asignación de Rol Interno</label>
             <div className="relative">
@@ -122,106 +128,146 @@ const RegistrarUsuario = () => {
             </div>
           </div>
 
-          {/* Input Correo Electrónico */}
-          <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Correo Electrónico Institucional</label>
-            <div className="relative">
-              <Mail className="absolute left-4 top-3.5 text-slate-400" size={18} />
-              <input 
-                type="email" 
-                value={email} 
-                onChange={(e) => setEmail(e.target.value)} 
-                required 
-                placeholder="ejemplo@bancodesangre.com"
-                className="w-full pl-12 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500/10 focus:border-red-500 outline-none transition text-slate-700 bg-slate-50/30 text-sm font-medium"
-              />
+          {/* Credenciales de Acceso */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Correo Electrónico Institucional</label>
+              <div className="relative">
+                <Mail className="absolute left-4 top-3.5 text-slate-400" size={18} />
+                <input 
+                  type="email" 
+                  value={email} 
+                  onChange={(e) => setEmail(e.target.value)} 
+                  required 
+                  placeholder="ejemplo@bancodesangre.com"
+                  className="w-full pl-12 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500/10 focus:border-red-500 outline-none transition text-slate-700 bg-slate-50/30 text-sm font-medium"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Contraseña Temporal</label>
+              <div className="relative">
+                <Lock className="absolute left-4 top-3.5 text-slate-400" size={18} />
+                <input 
+                  type={mostrarPassword ? 'text' : 'password'} 
+                  value={password} 
+                  onChange={(e) => setPassword(e.target.value)} 
+                  required 
+                  placeholder="Mínimo 6 caracteres"
+                  className="w-full pl-12 pr-12 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500/10 focus:border-red-500 outline-none transition text-slate-700 bg-slate-50/30 text-sm font-medium"
+                />
+                <button
+                  type="button
+"
+                  onClick={() => setMostrarPassword(!mostrarPassword)}
+                  className="absolute right-4 top-3.5 text-slate-400 hover:text-slate-600 transition"
+                >
+                  {mostrarPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* Input Contraseña */}
-          <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Contraseña Temporal de Acceso</label>
-            <div className="relative">
-              <Lock className="absolute left-4 top-3.5 text-slate-400" size={18} />
-              <input 
-                type="password" 
-                value={password} 
-                onChange={(e) => setPassword(e.target.value)} 
-                required 
-                placeholder="Mínimo 6 caracteres"
-                className="w-full pl-12 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500/10 focus:border-red-500 outline-none transition text-slate-700 bg-slate-50/30 text-sm font-medium"
-              />
+          {/* Formulario del Perfil Profesional */}
+          <div className="pt-4 border-t border-slate-100 space-y-6">
+            <p className="text-xs font-extrabold text-red-600 uppercase tracking-widest">
+              Información Identificativa y Laboral del {rol === 'ADMIN' ? 'Administrador' : 'Médico / Enfermero'}
+            </p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Cédula de Identidad (CI)</label>
+                <div className="relative">
+                  <IdCard className="absolute left-4 top-3.5 text-slate-400" size={18} />
+                  <input 
+                    type="text" 
+                    value={ci} 
+                    onChange={(e) => setCi(e.target.value)} 
+                    required
+                    placeholder="Ej. 8456215-CBBA"
+                    className="w-full pl-12 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500/10 focus:border-red-500 outline-none transition text-slate-700 bg-slate-50/30 text-sm font-medium"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Teléfono de Contacto</label>
+                <div className="relative">
+                  <Phone className="absolute left-4 top-3.5 text-slate-400" size={18} />
+                  <input 
+                    type="tel" 
+                    value={telefono} 
+                    onChange={(e) => setTelefono(e.target.value)} 
+                    placeholder="Ej. 70712345"
+                    className="w-full pl-12 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500/10 focus:border-red-500 outline-none transition text-slate-700 bg-slate-50/30 text-sm font-medium"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nombres</label>
+                <div className="relative">
+                  <User className="absolute left-4 top-3.5 text-slate-400" size={18} />
+                  <input 
+                    type="text" 
+                    value={nombres} 
+                    onChange={(e) => setNombres(e.target.value)} 
+                    required
+                    placeholder="Ej. Juan Carlos"
+                    className="w-full pl-12 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500/10 focus:border-red-500 outline-none transition text-slate-700 bg-slate-50/30 text-sm font-medium"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Apellidos</label>
+                <div className="relative">
+                  <User className="absolute left-4 top-3.5 text-slate-400" size={18} />
+                  <input 
+                    type="text" 
+                    value={apellidos} 
+                    onChange={(e) => setApellidos(e.target.value)} 
+                    required
+                    placeholder="Ej. Pérez Gómez"
+                    className="w-full pl-12 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500/10 focus:border-red-500 outline-none transition text-slate-700 bg-slate-50/30 text-sm font-medium"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Cargo / Ocupación</label>
+                <div className="relative">
+                  <Briefcase className="absolute left-4 top-3.5 text-slate-400" size={18} />
+                  <input 
+                    type="text" 
+                    value={cargo} 
+                    onChange={(e) => setCargo(e.target.value)} 
+                    placeholder={rol === 'ADMIN' ? 'Ej. Director, Encargado Sistemas' : 'Ej. Bioquímico, Enfermera Jefa'}
+                    className="w-full pl-12 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500/10 focus:border-red-500 outline-none transition text-slate-700 bg-slate-50/30 text-sm font-medium"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Código de Matrícula Profesional</label>
+                <div className="relative">
+                  <FileCode className="absolute left-4 top-3.5 text-slate-400" size={18} />
+                  <input 
+                    type="text" 
+                    value={codigoMedico} 
+                    onChange={(e) => setCodigoMedico(e.target.value)} 
+                    placeholder="Ej. MP-9455-CBBA"
+                    className="w-full pl-12 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500/10 focus:border-red-500 outline-none transition text-slate-700 bg-slate-50/30 text-sm font-medium"
+                  />
+                </div>
+              </div>
             </div>
           </div>
-
-          {/* FORMULARIO DINÁMICO: Solo aparece si el rol seleccionado es ADMIN */}
-          {rol === 'ADMIN' && (
-            <div className="pt-4 border-t border-slate-100 space-y-6 animate-fadeIn">
-              <p className="text-xs font-extrabold text-red-600 uppercase tracking-widest">Información del Perfil del Administrador</p>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nombres</label>
-                  <div className="relative">
-                    <User className="absolute left-4 top-3.5 text-slate-400" size={18} />
-                    <input 
-                      type="text" 
-                      value={nombres} 
-                      onChange={(e) => setNombres(e.target.value)} 
-                      required={rol === 'ADMIN'}
-                      placeholder="Ej. Juan Carlos"
-                      className="w-full pl-12 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500/10 focus:border-red-500 outline-none transition text-slate-700 bg-slate-50/30 text-sm font-medium"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Apellidos</label>
-                  <div className="relative">
-                    <User className="absolute left-4 top-3.5 text-slate-400" size={18} />
-                    <input 
-                      type="text" 
-                      value={apellidos} 
-                      onChange={(e) => setApellidos(e.target.value)} 
-                      required={rol === 'ADMIN'}
-                      placeholder="Ej. Pérez Gómez"
-                      className="w-full pl-12 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500/10 focus:border-red-500 outline-none transition text-slate-700 bg-slate-50/30 text-sm font-medium"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Cargo / Ocupación</label>
-                  <div className="relative">
-                    <Briefcase className="absolute left-4 top-3.5 text-slate-400" size={18} />
-                    <input 
-                      type="text" 
-                      value={cargo} 
-                      onChange={(e) => setCargo(e.target.value)} 
-                      placeholder="Ej. Director Médico, Bioquímico"
-                      className="w-full pl-12 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500/10 focus:border-red-500 outline-none transition text-slate-700 bg-slate-50/30 text-sm font-medium"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Código de Colegiatura Médica</label>
-                  <div className="relative">
-                    <FileCode className="absolute left-4 top-3.5 text-slate-400" size={18} />
-                    <input 
-                      type="text" 
-                      value={codigoMedico} 
-                      onChange={(e) => setCodigoMedico(e.target.value)} 
-                      placeholder="Ej. CM-9455-CBBA"
-                      className="w-full pl-12 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500/10 focus:border-red-500 outline-none transition text-slate-700 bg-slate-50/30 text-sm font-medium"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Botón de Envío */}
           <div className="pt-4">
