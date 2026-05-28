@@ -150,7 +150,7 @@ exports.registrarUsuario = async (req, res) => {
         // Verificar duplicados de correo electrónico
         const [existeEmail] = await connection.query('SELECT * FROM usuarios WHERE email = ?', [email]);
         if (existeEmail.length > 0) {
-            await connection.rollback(); // 👈 Corregido: Rollback antes de salir
+            await connection.rollback(); 
             return res.status(400).json({ msg: 'Este correo ya está registrado.' });
         }
 
@@ -165,7 +165,7 @@ exports.registrarUsuario = async (req, res) => {
             }
             const [existeCI] = await connection.query('SELECT * FROM personal WHERE ci = ?', [ci]);
             if (existeCI.length > 0) {
-                await connection.rollback(); // 👈 Corregido
+                await connection.rollback(); 
                 return res.status(400).json({ msg: 'Esta Cédula de Identidad (CI) ya está asignada a otro empleado.' });
             }
         }
@@ -201,7 +201,7 @@ exports.registrarUsuario = async (req, res) => {
         console.error("Error crítico en registrarUsuario:", error);
         res.status(500).json({ msg: 'Error interno al registrar al usuario en la base de datos.' });
     } finally {
-        connection.release(); // 👈 Ahora se libera de forma segura al final del ciclo
+        connection.release(); 
     }
 };
 

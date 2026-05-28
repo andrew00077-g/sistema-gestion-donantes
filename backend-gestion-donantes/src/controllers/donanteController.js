@@ -62,4 +62,32 @@ exports.registrarDonante = async (req, res) => {
         // Liberamos la conexión de vuelta al pool
         connection.release();
     }
+
+};
+
+exports.obtenerDonantes = async (req, res) => {
+    try {
+        const [rows] = await db.query(`
+            SELECT 
+                id_donante,
+                id_usuario,
+                nombres,
+                apellidos,
+                ci,
+                fecha_nacimiento,
+                genero,
+                tipo_sangre,
+                telefono,
+                peso_kg,
+                estado_medico 
+            FROM donantes
+            ORDER BY id_donante DESC
+        `);
+
+        // Enviamos el array directo de registros
+        res.status(200).json(rows);
+    } catch (error) {
+        console.error("Error al obtener el padrón de donantes:", error);
+        res.status(500).json({ msg: 'Error interno del servidor al consultar la base de datos.' });
+    }
 };
