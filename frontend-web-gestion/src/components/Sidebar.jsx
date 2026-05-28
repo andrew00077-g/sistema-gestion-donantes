@@ -17,6 +17,7 @@ const Sidebar = () => {
     { icon: <Users size={20}/>, label: 'Donantes', path: '/donantes' },
     { icon: <Droplets size={20}/>, label: 'Inventario Sangre', path: '/inventario' },
     { icon: <Bell size={20}/>, label: 'Alertas', path: '/alertas' },
+    { icon: <Droplets size={20}/>, label: 'Historial Donaciones', path: '/donaciones' },
   ];
 
   // TRUCO DE SEGURIDAD EN VISTA: Si es ADMIN, le inyectamos la opción de Registrar Usuarios del Sistema

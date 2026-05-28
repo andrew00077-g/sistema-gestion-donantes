@@ -4,12 +4,13 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Donantes from './pages/Donantes';
 import FichaDonante from './pages/FichaDonante'; 
-import Citas from './pages/Citas'; // <- Importamos la nueva vista de Citas
+import Citas from './pages/Citas'; 
 import InventarioStock from './pages/InventarioStock';     
 import RegistrarUsuario from './pages/RegistrarUsuario'; 
 import Alertas from './pages/Alertas'; 
 import Sidebar from './components/Sidebar';
 import MenuPerfil from './components/MenuPerfil';
+import Donaciones from './pages/Donaciones';
 
 // GUARDiÁN DE SEGURIDAD INTERNO: Bloquea la ruta si no es administrador
 const RutaProtegidaAdmin = ({ children }) => {
@@ -89,6 +90,7 @@ function App() {
           <Route path="/citas" element={<Citas />} /> {/* <- Inyectamos la ruta aquí */}
           <Route path="/inventario" element={<InventarioStock />} />
           <Route path="/alertas" element={<Alertas />} />
+          <Route path="/donaciones" element={<Donaciones />} />
           
           <Route 
             path="/registrar" 
