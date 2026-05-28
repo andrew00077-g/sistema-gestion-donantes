@@ -1,5 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, Droplets, Bell, LogOut, UserPlus, ShieldAlert } from 'lucide-react'; // Importamos ShieldAlert para el Admin
+// Importamos CalendarDays para representar la agenda de citas
+import { LayoutDashboard, Users, Droplets, Bell, LogOut, UserPlus, ShieldAlert, CalendarDays } from 'lucide-react'; 
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ const Sidebar = () => {
   const menuItems = [
     { icon: <LayoutDashboard size={20}/>, label: 'Dashboard', path: '/dashboard' },
     { icon: <UserPlus size={20}/>, label: 'Registrar Donante', path: '/registrar-donante' },
+    { icon: <CalendarDays size={20}/>, label: 'Citas Médicas', path: '/citas' }, // <- Agregado aquí de manera limpia
     { icon: <Users size={20}/>, label: 'Donantes', path: '/donantes' },
     { icon: <Droplets size={20}/>, label: 'Inventario Sangre', path: '/inventario' },
     { icon: <Bell size={20}/>, label: 'Alertas', path: '/alertas' },
@@ -20,7 +22,6 @@ const Sidebar = () => {
   // TRUCO DE SEGURIDAD EN VISTA: Si es ADMIN, le inyectamos la opción de Registrar Usuarios del Sistema
   if (userRol === 'ADMIN') {
     menuItems.push({ 
-      
       icon: <ShieldAlert size={20} />, 
       label: 'Gestión del Personal', 
       path: '/registrar' // Apunta exactamente a la ruta que creamos en tu App.jsx

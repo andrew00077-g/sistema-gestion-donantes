@@ -4,6 +4,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Donantes from './pages/Donantes';
 import FichaDonante from './pages/FichaDonante'; 
+import Citas from './pages/Citas'; // <- Importamos la nueva vista de Citas
 import InventarioStock from './pages/InventarioStock';     
 import RegistrarUsuario from './pages/RegistrarUsuario'; 
 import Alertas from './pages/Alertas'; 
@@ -85,6 +86,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/donantes" element={<Donantes />} />
           <Route path="/registrar-donante" element={<FichaDonante />} />
+          <Route path="/citas" element={<Citas />} /> {/* <- Inyectamos la ruta aquí */}
           <Route path="/inventario" element={<InventarioStock />} />
           <Route path="/alertas" element={<Alertas />} />
           
