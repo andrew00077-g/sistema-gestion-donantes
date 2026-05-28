@@ -22,7 +22,7 @@ const Sidebar = () => {
     menuItems.push({ 
       
       icon: <ShieldAlert size={20} />, 
-      label: 'Registrar Usuario (Admin)', 
+      label: 'Gestión del Personal', 
       path: '/registrar' // Apunta exactamente a la ruta que creamos en tu App.jsx
     });
   }
