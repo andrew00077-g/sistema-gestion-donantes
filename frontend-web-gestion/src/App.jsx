@@ -87,7 +87,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/donantes" element={<Donantes />} />
           <Route path="/registrar-donante" element={<FichaDonante />} />
-          <Route path="/citas" element={<Citas />} /> {/* <- Inyectamos la ruta aquí */}
+          <Route path="/citas" element={<Citas />} /> 
           <Route path="/inventario" element={<InventarioStock />} />
           <Route path="/alertas" element={<Alertas />} />
           <Route path="/donaciones" element={<Donaciones />} />
