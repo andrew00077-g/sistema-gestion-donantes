@@ -10,7 +10,7 @@ const Donaciones = () => {
   useEffect(() => {
     const cargarHistorialDonaciones = async () => {
       try {
-        // GET /api/donaciones para listar el historial
+        // GET /api/donaciones  listar el historial
         const res = await fetch("http://localhost:3000/api/donaciones", {
           headers: { Authorization: `Bearer ${token}` },
         });

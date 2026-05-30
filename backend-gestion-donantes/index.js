@@ -1,4 +1,4 @@
-require('dotenv').config(); // Línea 1 obligatoria para leer el .env
+require('dotenv').config(); 
 
 const express = require('express');
 const cors = require('cors');
@@ -7,7 +7,8 @@ const cors = require('cors');
 const db = require('./src/config/db'); 
 const authRoutes = require('./src/routes/authRoutes'); 
 const donanteRoutes = require('./src/routes/donanteRoutes'); 
-const operacionesRoutes = require('./src/routes/operacionesRoutes'); // Importación de alertas y citas
+const operacionesRoutes = require('./src/routes/operacionesRoutes');
+const urgenciaRoutes = require('./src/routes/urgencia.routes'); 
 
 // 2. INICIALIZACIÓN DE EXPRESS
 const app = express();
@@ -25,10 +26,11 @@ app.get('/', (req, res) => {
     });
 });
 
-// 5. CONEXIÓN DE LAS RUTAS DEL SISTEMA (Todas agrupadas y ordenadas)
+// 5. CONEXIÓN DE LAS RUTAS DEL SISTEMA 
 app.use('/api/auth', authRoutes);
 app.use('/api/donantes', donanteRoutes); 
 app.use('/api/operaciones', operacionesRoutes); 
+app.use('/api/urgencia', urgenciaRoutes);
 
 // 6. ENCENDIDO DEL SERVIDOR
 const PORT = process.env.PORT || 3000;

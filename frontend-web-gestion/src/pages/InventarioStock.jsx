@@ -6,7 +6,7 @@ const InventarioStock = () => {
   const [cargando, setCargando] = useState(true);
   const token = localStorage.getItem('token');
 
-  // 🔄 Función exclusiva para el botón manual (evita colisiones con el efecto inicial)
+  //  Función exclusiva para el botón manual 
   const refrescarInventarioManual = async () => {
     setCargando(true);
     try {
@@ -24,7 +24,7 @@ const InventarioStock = () => {
     }
   };
 
-  // 🌟 SOLUCIÓN AL ADVERTENCIA: Aislamos el fetch síncrono inicial dentro de su propio efecto
+  //  SOLUCIÓN AL ADVERTENCIA
   useEffect(() => {
     let activo = true; // Bandera para evitar fugas de memoria si el componente se desmonta rápido
 
@@ -52,7 +52,7 @@ const InventarioStock = () => {
     };
   }, [token]); // Agregamos token como dependencia segura
 
-  // Función auxiliar para simular un stock completo con los 8 grupos si la BD está vacía
+  //  simular un stock completo con los 8 grupos si la BD está vacía
   const gruposBase = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
   const obtenerUnidades = (group) => {
     const registro = inventario.find(item => item.tipo_sangre === group);

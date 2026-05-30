@@ -53,7 +53,7 @@ const Login = () => {
     }
   };
 
-  // 2. RECUPERAR CONTRASEÑA (Envío al nuevo endpoint del Backend)
+  // 2. RECUPERAR CONTRASEÑA 
   const handleRecuperar = async (e) => {
     e.preventDefault();
     setError('');
@@ -78,7 +78,7 @@ const Login = () => {
         setError(datos.msg || 'No se pudo procesar la solicitud.');
       }
     } catch (err) {
-      // 🌟 CORREGIDO: Usamos la variable 'err' en consola para depurar y quitar el warning
+      
       console.error("Error en la conexión de recuperación:", err);
       setError('Error al conectar con el servidor.');
     } finally {

@@ -11,6 +11,7 @@ import Alertas from './pages/Alertas';
 import Sidebar from './components/Sidebar';
 import MenuPerfil from './components/MenuPerfil';
 import Donaciones from './pages/Donaciones';
+import UrgenciaPanel from './components/UrgenciaPanel';
 
 // GUARDiÁN DE SEGURIDAD INTERNO: Bloquea la ruta si no es administrador
 const RutaProtegidaAdmin = ({ children }) => {
@@ -30,7 +31,6 @@ const Layout = ({ children }) => {
   const isPublicPage = location.pathname === '/' || location.pathname === '/login';
 
   // Calculamos el usuario dinámicamente durante el renderizado 
-  // en vez de usar un estado local y sincronizarlo con useEffect.
   let usuarioActual = null;
   
   if (localStorage.getItem('token')) {
@@ -69,7 +69,7 @@ const Layout = ({ children }) => {
           />
         </nav>
 
-        <div className="flex-grow">
+        <div className="grow">
           {children}
         </div>
       </div>
@@ -92,9 +92,12 @@ function App() {
           <Route path="/alertas" element={<Alertas />} />
           <Route path="/donaciones" element={<Donaciones />} />
           
+          {/* ⚡ NUEVA RUTA: PANEL DE EMERGENCIAS CON IA */}
+          <Route path="/urgencia-ia" element={<UrgenciaPanel />} />
+          
           <Route 
             path="/registrar" 
-            element={
+            element = {
               <RutaProtegidaAdmin>
                 <RegistrarUsuario />
               </RutaProtegidaAdmin>

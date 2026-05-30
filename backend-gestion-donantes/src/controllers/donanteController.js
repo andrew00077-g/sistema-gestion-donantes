@@ -64,7 +64,7 @@ exports.obtenerDonantes = async (req, res) => {
         const [rows] = await db.query(`
             SELECT 
                 id_donante, id_usuario, nombres, apellidos, ci, 
-                fecha_nacimiento, genero, tipo_sangre, telefono, peso_kg, estado_medico 
+                fecha_nacimiento, genero, tipo_sangre, telefono, peso_kg, estado_medico, latitud, longitud
             FROM donantes
             ORDER BY id_donante DESC
         `);
@@ -76,7 +76,6 @@ exports.obtenerDonantes = async (req, res) => {
 };
 
 // 3. ACTUALIZAR DONANTE COMPLETO / ESTADO CLINICO (¡Solución Definitiva!)
-// Esta única función procesa los cambios rápidos de estado AND los cambios generales de la ficha médica.
 exports.actualizarEstadoClinico = async (req, res) => {
     const { id } = req.params;
     
@@ -101,7 +100,7 @@ exports.actualizarEstadoClinico = async (req, res) => {
         // Resolvemos el dilema de nombres: prioriza lo que venga del botón rápido o del formulario de la ficha
         const estadoFinal = estado_clinico || estado_medico || donanteActual[0].estado_medico;
 
-        // 3. Ejecutamos un query directo sobre el pool (evita bloqueos de transacciones mal cerradas)
+        // 3. Ejecutamos un query directo sobre el pool
         await db.query(
             `UPDATE donantes SET 
                 nombres = ?, 
@@ -118,5 +117,69 @@ exports.actualizarEstadoClinico = async (req, res) => {
     } catch (error) {
         console.error(" Error crítico al actualizar el donante:", error);
         return res.status(500).json({ msg: 'Error interno del servidor al procesar la actualización.' });
+    }
+};
+
+// 4. NUEVO: BUSCAR DONANTES DISPONIBLES (Geocerca Real con Fórmula de Haversine para Administrativos)
+exports.buscarDonantesDisponibles = async (req, res) => {
+    try {
+        const { tipoSangre, radioKm } = req.query;
+
+        if (!tipoSangre) {
+            return res.status(400).json({ error: "El tipo de sangre es requerido." });
+        }
+
+        // Coordenadas fijas del Banco de Sangre de Cochabamba (Calle Aurelio Meleán Nº 487)
+        const latBanco = -17.3892;
+        const lonBanco = -66.1478;
+        const radioMaximo = radioKm ? parseFloat(radioKm) : 3.0; // 3km de geocerca por defecto
+
+        // CONSULTA MATEMÁTICA PURA ADAPTADA A TU ESTRUCTURA REAL DE TABLA
+        const query = `
+            SELECT 
+                id_donante,
+                nombres,
+                apellidos,
+                tipo_sangre,
+                genero,
+                telefono,
+                ultima_donacion,
+                latitud,
+                longitud,
+                (
+                    6371 * ACOS(
+                        COS(RADIANS(?)) * COS(RADIANS(latitud)) * COS(RADIANS(longitud) - RADIANS(?)) + 
+                        SIN(RADIANS(?)) * SIN(RADIANS(latitud))
+                    )
+                ) AS distancia_km
+            FROM donantes
+            WHERE 
+                tipo_sangre = ?
+                AND estado_medico = 'APTO'
+                AND latitud IS NOT NULL 
+                AND longitud IS NOT NULL
+                AND (
+                    ultima_donacion IS NULL 
+                    OR (genero = 'M' AND ultima_donacion <= DATE_SUB(CURDATE(), INTERVAL 3 MONTH))
+                    OR (genero = 'F' AND ultima_donacion <= DATE_SUB(CURDATE(), INTERVAL 4 MONTH))
+                )
+            HAVING distancia_km <= ?
+            ORDER BY distancia_km ASC;
+        `;
+
+        // Ejecución en la base de datos MySQL usando el pool (db.query o db.execute)
+        const [rows] = await db.query(query, [
+            latBanco,
+            lonBanco,
+            latBanco,
+            tipoSangre,
+            radioMaximo
+        ]);
+
+        return res.status(200).json(rows);
+
+    } catch (error) {
+        console.error("Error en la geocerca de buscarDonantesDisponibles:", error);
+        return res.status(500).json({ msg: 'Error interno del servidor al calcular la geocerca logística.' });
     }
 };

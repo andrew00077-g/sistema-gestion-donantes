@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-// Importamos CalendarDays para representar la agenda de citas
-import { LayoutDashboard, Users, Droplets, Bell, LogOut, UserPlus, ShieldAlert, CalendarDays } from 'lucide-react'; 
+// Importamos CalendarDays para la agenda y Zap para representar la Inteligencia Artificial
+import { LayoutDashboard, Users, Droplets, Bell, LogOut, UserPlus, ShieldAlert, CalendarDays, Zap } from 'lucide-react'; 
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -13,9 +13,10 @@ const Sidebar = () => {
   const menuItems = [
     { icon: <LayoutDashboard size={20}/>, label: 'Dashboard', path: '/dashboard' },
     { icon: <UserPlus size={20}/>, label: 'Registrar Donante', path: '/registrar-donante' },
-    { icon: <CalendarDays size={20}/>, label: 'Citas Médicas', path: '/citas' }, // <- Agregado aquí de manera limpia
+    { icon: <CalendarDays size={20}/>, label: 'Citas Médicas', path: '/citas' },
     { icon: <Users size={20}/>, label: 'Donantes', path: '/donantes' },
     { icon: <Droplets size={20}/>, label: 'Inventario Sangre', path: '/inventario' },
+    { icon: <Zap size={20} className="text-amber-400" />, label: 'Emergencias IA', path: '/urgencia-ia' }, 
     { icon: <Bell size={20}/>, label: 'Alertas', path: '/alertas' },
     { icon: <Droplets size={20}/>, label: 'Historial Donaciones', path: '/donaciones' },
   ];
@@ -25,7 +26,7 @@ const Sidebar = () => {
     menuItems.push({ 
       icon: <ShieldAlert size={20} />, 
       label: 'Gestión del Personal', 
-      path: '/registrar' // Apunta exactamente a la ruta que creamos en tu App.jsx
+      path: '/registrar' 
     });
   }
 

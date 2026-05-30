@@ -5,12 +5,12 @@ import { Users, AlertTriangle, Droplets, BellRing, Sparkles, SendHorizontal, Use
 const Dashboard = () => {
   const navigate = useNavigate();
 
-  // OPTIMIZACIÓN: Inicializamos el estado directamente leyendo el localStorage
+  // Inicializacion del estado directamente leyendo el localStorage
   const [nombreAdmin] = useState(() => {
     return localStorage.getItem('nombreAdmin') || 'Administrador';
   });
 
-  // CONTROL DE ACCESO (Solo valida y expulsa si no hay credenciales válidas)
+  // CONTROL DE ACCESO 
   useEffect(() => {
     const token = localStorage.getItem('token');
     const rol = localStorage.getItem('rol');
@@ -21,13 +21,13 @@ const Dashboard = () => {
     }
   }, [navigate]);
 
-  // Función para cerrar sesión de forma segura
+  //  cerrar sesión de forma segura
   const handleLogout = () => {
     localStorage.clear();
     navigate('/login');
   };
 
-  // Datos simulados del inventario actual en Cochabamba
+  // Datos simulados 
   const stockSangre = [
     { grupo: 'O RH+', porcentaje: 85, color: 'bg-red-600' },
     { grupo: 'A RH+', porcentaje: 60, color: 'bg-red-500' },

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { HeartPulse, ArrowRight } from 'lucide-react';
+import { HeartPulse } from 'lucide-react';
 
 const Inicio = () => {
   return (
@@ -31,7 +31,7 @@ const Inicio = () => {
         <h1 className="text-4xl sm:text-6xl font-black text-white tracking-tight mb-4 drop-shadow-lg">
           Banco de Sangre <br className="hidden sm:block" />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-rose-600">
-            Referencia Departamental
+            de Referencia Cochabamba
           </span>
         </h1>
         
@@ -45,7 +45,6 @@ const Inicio = () => {
             className="flex items-center justify-center gap-2 px-8 py-4 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition shadow-lg shadow-red-600/30 active:scale-95 group"
           >
             INGRESAR AL SISTEMA
-            <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
           </Link>
           
           
@@ -56,7 +55,7 @@ const Inicio = () => {
       {/* Pie de página pequeño */}
       <div className="absolute bottom-6 w-full text-center z-10">
         <p className="text-xs text-slate-400 font-medium tracking-widest uppercase">
-          Cochabamba • Bolivia
+         
         </p>
       </div>
     </div>

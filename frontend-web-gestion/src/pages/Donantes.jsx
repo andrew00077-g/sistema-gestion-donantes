@@ -127,7 +127,7 @@ const Donantes = () => {
     setGuardandoFicha(true);
     const idActual = fichaSeleccionada.id_donante || fichaSeleccionada.id;
 
-    // Aseguramos que los cambios manuales en la ficha respeten el ENUM del servidor
+    
     const datosListos = {
       ...datosEditados,
       estado_medico: traductores.haciaBackend(datosEditados.estado_medico || datosEditados.estado_clinico),
@@ -184,7 +184,7 @@ const Donantes = () => {
   return (
     <div className="p-8 space-y-6 bg-slate-50 min-h-screen font-sans pb-16 print:p-0 print:bg-white">
       
-      {/* 🚀 CSS AISLADO PARA CONTROL ABSOLUTO DE IMPRESIÓN */}
+      {/*  CSS AISLADO PARA  PDF */}
       <style>{`
         @media print {
           body * {
